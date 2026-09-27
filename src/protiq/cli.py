@@ -33,6 +33,13 @@ def _config(args):
     )
 
 
+def _ensure_parent(path):
+    """Create the folder a file will be saved into, so --out results/x.csv just works."""
+    if path:
+        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    return path
+
+
 def _load_data(path):
     df = pd.read_csv(path)
     missing = {"uniprot_id", "sequence", "label"} - set(df.columns)
@@ -120,7 +127,7 @@ def cmd_predict(args):
         print(f"Note: {weak} of {len(res)} proteins had no sequence or structure neighbors in the reference set.\n"
               "      Their predictions are low evidence. A larger reference set (fetch --per-class 2000+) helps.")
     if args.out:
-        res.to_csv(args.out, index=False)
+        res.to_csv(_ensure_parent(args.out), index=False)
         print(f"Saved predictions to {args.out}")
 
 
@@ -130,7 +137,8 @@ def cmd_explain(args):
     bundle = load_bundle(args.model)
     ids, seqs = _read_inputs(args)
     pdbs = {ids[0]: args.pdb} if args.pdb else None
-    res = explain_prediction(bundle, ids[0], seqs[0], num_features=args.num_features, html_path=args.html,
+    res = explain_prediction(bundle, ids[0], seqs[0], num_features=args.num_features,
+                             html_path=_ensure_parent(args.html),
                              pdb_paths=pdbs)
     print(format_explanation(res))
 
@@ -141,7 +149,7 @@ def cmd_ablate(args):
     print("\nAblation (each feature group removed in turn):")
     print(out.to_string(index=False, float_format=lambda v: f"{v:.3f}"))
     if args.out:
-        out.to_csv(args.out, index=False)
+        out.to_csv(_ensure_parent(args.out), index=False)
 
 
 def cmd_sweep_k(args):
@@ -152,7 +160,7 @@ def cmd_sweep_k(args):
           .rename(columns={False: "kNN only", True: "kNN + LR fallback"})
           .to_string(float_format=lambda v: f"{v:.3f}"))
     if args.out:
-        out.to_csv(args.out, index=False)
+        out.to_csv(_ensure_parent(args.out), index=False)
 
 
 def cmd_blast(args):
