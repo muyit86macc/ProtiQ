@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+build/
+dist/
+
+# Data and models (download or train these; don't commit them)
+data/*
+!data/.gitkeep
+models/*
+!models/.gitkeep
+*.joblib
+*.pdb
+*.dmnd
+tmp/
+
+# Notebooks and OS
+.ipynb_checkpoints/
+.DS_Store
+
+# Secrets
+.env
+*.key
